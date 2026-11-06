@@ -142,6 +142,7 @@ Document-level, top-k = 3 chunks mapped to parent documents and de-duplicated; s
 | **Mean** | **0.833** | **1.000** | **0.583** | **1.000** |
 
 **Recommendation:** deploy the fixed-size-with-overlap collection (`cred_kb_fixed`, set as `DEPLOYED_COLLECTION`). Both strategies found every relevant document (mean recall 1.000), but fixed-size chunking reached mean precision 0.833 against 0.583, returning only the relevant document on Q2, Q4 and Q5, where the sentence collection always pulled in an unrelated third document. Fixed chunks cut sentences, so the agent expands them back to whole sentences before answering. **Caveat:** with 4-sentence documents the sentence strategy makes only 2 chunks per document, so with top-k = 3 its precision cannot exceed 0.5 on single-document questions; the result depends on document length and k, and 6 queries is a small sample.
+
 ---
 
 ## Part 2 — CrewAI orchestration, tools, memory & guardrails
@@ -199,6 +200,7 @@ Demonstrated on "My PAN is ABCDE1234F, Aadhaar 2345 6789 0123 and bank account 1
 **Output-side groundedness check** (`output_groundedness_guard`): if retrieval's top-1 similarity is below 0.42, the policy part of the draft is replaced by the refusal in code, whatever the Composer wrote; facts from the looked-up record are kept. Demonstrated on "How do I invest in Bitcoin through Cred?" (0.21 → refused) and "status of CRED-LA-0004, and can I use it to buy gold coins?" (0.26 → status answered from the record, gold-coin part refused; intent stays `policy+status`).
 
 **Bug found and fixed while demonstrating:** messages containing a record id were routed to retrieval only when they contained known policy keywords, so "…can I use it to buy gold coins?" was silently dropped. `has_extra_question()` now sends any message with meaningful words beyond the status request to retrieval, so extra questions are answered or refused, never ignored.
+
 ---
 
 ## Part 3 — Deployment, logging & evaluation
