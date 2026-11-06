@@ -1,0 +1,2 @@
+# NRI-account eligibility
+Non-resident Indians and persons of Indian origin holding an OCI card can open NRE and NRO accounts. Applicants must submit a valid passport, a valid visa or overseas residence permit, an overseas address proof and a PAN card or Form 60. NRE account balances and interest are fully repatriable and tax-free in India, while NRO account interest is taxable in India. Repatriation from an NRO account is capped at USD 1 million per financial year.

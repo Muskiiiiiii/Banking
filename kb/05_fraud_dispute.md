@@ -1,0 +1,2 @@
+# Fraud-dispute resolution process
+A member who spots an unauthorised transaction should block the card or account in the app immediately and raise a dispute within 3 working days to keep liability at zero. Disputes reported between 4 and 7 working days carry a limited liability capped at Rs 10,000 for most account types. The dispute team gives a shadow credit of the disputed amount within 10 working days while the investigation runs. Every fraud dispute is resolved within 90 days, and an unresolved complaint can be escalated to the RBI Ombudsman after 30 days.

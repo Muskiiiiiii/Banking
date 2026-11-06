@@ -1,0 +1,32 @@
+# task03_chunk_index
+# command: python -m scripts.task3_index
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+Loaded 13 documents from C:\Users\ronak\Downloads\Banking\kb
+
+--- fixed chunks: 44 total; first two from 01_loan_eligibility ---
+  01_loan_eligibility::fixed::0        (197 chars) 'Personal loan applicants must be salaried or self-employed Indian residents aged 21 to 60 with a net monthly income of at least Rs 25,000. Home loan applicants can be aged 21 to 65 at loan maturity'
+  01_loan_eligibility::fixed::1        (196 chars) 'applicants can be aged 21 to 65 at loan maturity and must contribute at least 20% of the property value as down payment. Auto loans require a minimum net monthly income of Rs 20,000 and fund up to'
+
+--- sentence chunks: 26 total; first two from 01_loan_eligibility ---
+  01_loan_eligibility::sent::0         (269 chars) 'Personal loan applicants must be salaried or self-employed Indian residents aged 21 to 60 with a net monthly income of at least Rs 25,000. Home loan applicants can be aged 21 to 65 at loan maturity and must contribute at least 20% of the property value as down payment.'
+  01_loan_eligibility::sent::1         (317 chars) 'Auto loans require a minimum net monthly income of Rs 20,000 and fund up to 90% of the on-road price of a new vehicle. Education loans need an Indian co-applicant and confirmed admission to a recognised course, while business loans require at least 3 years of business vintage and 2 years of filed income-tax returns.'
+
+[index] cred_kb_fixed      strategy=fixed    chunks=44 (from 13 documents)
+[index] cred_kb_sentence   strategy=sentence chunks=26 (from 13 documents)
+
+Sample query on cred_kb_fixed (count=44): 'Is there a prepayment penalty on a home loan?'
+  cosine=0.6750  08_prepayment_penalty::fixed::0      Floating-rate home loans taken by individuals carry no prepayment or f...
+  cosine=0.5222  08_prepayment_penalty::fixed::2      a foreclosure charge of 3% of the outstanding principal. Part-prepayme...
+  cosine=0.5104  08_prepayment_penalty::fixed::1      prepaid only after 6 EMIs have been paid, and the foreclosure charge i...
+
+Sample query on cred_kb_sentence (count=26): 'Is there a prepayment penalty on a home loan?'
+  cosine=0.6984  08_prepayment_penalty::sent::0       Floating-rate home loans taken by individuals carry no prepayment or f...
+  cosine=0.5611  08_prepayment_penalty::sent::1       Auto and business loans carry a foreclosure charge of 3% of the outsta...
+  cosine=0.4285  07_interest_rate_slabs::sent::0      Personal loan interest rates range from 11.5% to 24% per annum dependi...
+
+--- stderr ---
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1643.74it/s]

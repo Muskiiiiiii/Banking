@@ -1,0 +1,2 @@
+# Interest-rate slabs
+Personal loan interest rates range from 11.5% to 24% per annum depending on the applicant's credit score and income. Home loans are priced between 8.5% and 10.5% per annum and are linked to the repo rate, so they reset when the RBI changes the repo rate. Auto loans carry 9% to 13% per annum, education loans carry 9.5% to 12.5% per annum, and business loans carry 14% to 22% per annum. Applicants with a credit score of 780 or higher qualify for the lowest slab in each product.

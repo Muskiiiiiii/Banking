@@ -1,0 +1,4 @@
+# OPTIONAL — only for MOCK_LLM=0 with a real OpenAI-compatible model. Not needed for grading.
+-r requirements.txt
+autogen-ext[openai]==0.7.5
+openai>=1.40

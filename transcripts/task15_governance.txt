@@ -1,0 +1,57 @@
+# task15_governance
+# command: python -m scripts.task15_governance
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+
+==========================================================================================
+APPLICATION LAYER — least autonomy
+==========================================================================================
+LoanStatusTool.restricted_to_roles = ['Loan Lookup Agent']
+actual crew wiring (audit_crew): ['Policy Retrieval Agent -> rag_lookup', 'Loan Lookup Agent -> check_loan_application_status']
+
+Attempt 1 — give the lookup tool to other agents at construction time:
+  Policy Retrieval Agent: BLOCKED -> Least-autonomy guard: agent 'Policy Retrieval Agent' may not be given tool 'check_loan_application_status'. Only ['Loan Lookup Agent'] may call it.
+  Response Composer: BLOCKED -> Least-autonomy guard: agent 'Response Composer' may not be given tool 'check_loan_application_status'. Only ['Loan Lookup Agent'] may call it.
+
+Attempt 2 — sneak it in afterwards through a Task-level tools override:
+  BLOCKED before kickoff -> Least-autonomy guard: agent 'Policy Retrieval Agent' may not be given tool 'check_loan_application_status'. Only ['Loan Lookup Agent'] may call it.
+
+Control — the Lookup Agent itself:
+  Loan Lookup Agent: allowed, tools=['check_loan_application_status']
+
+==========================================================================================
+APPLICATION LAYER — risk classification
+==========================================================================================
+Risk level: High
+
+Under the Low/Medium/High scheme this system is High risk. It reads loan-application records that contain financial data (loan amounts, application status and fraud-review flags) and the answers it gives to support staff can shape how a member's loan or fraud dispute is handled, which is exactly the 'financial data' case the scheme lists as High. Members may also type PAN, Aadhaar or bank-account numbers into the chat. It is not a Medium-risk ticket summariser because a wrong answer about prepayment charges, KYC or dispute deadlines can cost a member money or legal protection. The controls that follow from High risk are: PII masking before any model or log sees the text, least-autonomy tool access, a groundedness refusal, a second independent review team, a per-request cost cap, structured JSONL audit logs, and human escalation via the escalation score; the agent informs staff and never approves, rejects or disburses a loan itself.
+
+==========================================================================================
+RUNTIME LAYER — per-request token / cost budget cap
+==========================================================================================
+Caps per request: input <= 400 tokens; total <= 20000 tokens and <= $0.012 (notional $0.0006 per 1K tokens; ~4 characters per token)
+
+(1) normal request: used 3518 tokens ($0.002111) -> answered, flags=['review_approved']
+
+(2) deliberately oversized request: 13200 characters (~3300 tokens)
+    answer : Request rejected: input is ~3300 tokens, over the per-request input cap of 400 tokens. No model call was made.
+    flags  : ['budget_exceeded']
+    tokens charged = 0; LLM calls made = 0
+
+(3) normal-size request under a deliberately tiny total cap (1,500 tokens):
+    answer : Request stopped: call 'crew:Response Composer' would bring usage to 2572 tokens ($0.00154), over the cap of 1500 tokens / $0.0009.
+    flags  : ['budget_exceeded']
+    tokens used when stopped = 1216 (cap 1,500 -> never exceeded)
+
+--- stderr ---
+C:\Users\ronak\Downloads\Banking\scripts\task15_governance.py:57: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  cm = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1512.78it/s]
+Error executing listener call_llm_and_parse: Request stopped: call 'crew:Response Composer' would bring usage to 2572 tokens ($0.00154), over the cap of 1500 tokens / $0.0009.
+Error executing listener call_llm_and_parse: Request stopped: call 'crew:Response Composer' would bring usage to 2572 tokens ($0.00154), over the cap of 1500 tokens / $0.0009.
+Error executing listener call_llm_and_parse: Request stopped: call 'crew:Response Composer' would bring usage to 2572 tokens ($0.00154), over the cap of 1500 tokens / $0.0009.

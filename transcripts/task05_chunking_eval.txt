@@ -1,0 +1,90 @@
+# task05_chunking_eval
+# command: python -m scripts.task5_eval_chunking
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+
+==========================================================================================
+cred_kb_fixed   (top-k = 3 chunks)
+==========================================================================================
+Q1: What is the minimum monthly income required for a personal loan?
+    chunks -> parent docs : ['01_loan_eligibility', '07_interest_rate_slabs', '01_loan_eligibility']
+    deduped retrieved     : ['01_loan_eligibility', '07_interest_rate_slabs']
+    relevant              : ['01_loan_eligibility']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q2: Do I pay a foreclosure charge if I prepay my personal loan?
+    chunks -> parent docs : ['08_prepayment_penalty', '08_prepayment_penalty', '08_prepayment_penalty']
+    deduped retrieved     : ['08_prepayment_penalty']
+    relevant              : ['08_prepayment_penalty']
+    precision = 1/1 = 1.000    recall = 1/1 = 1.000
+Q3: Which documents are needed to complete KYC?
+    chunks -> parent docs : ['04_kyc_documents', '04_kyc_documents', '11_joint_account_rules']
+    deduped retrieved     : ['04_kyc_documents', '11_joint_account_rules']
+    relevant              : ['04_kyc_documents']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q4: What should I do if I see an unauthorised transaction on my card?
+    chunks -> parent docs : ['05_fraud_dispute', '05_fraud_dispute', '05_fraud_dispute']
+    deduped retrieved     : ['05_fraud_dispute']
+    relevant              : ['05_fraud_dispute']
+    precision = 1/1 = 1.000    recall = 1/1 = 1.000
+Q5: How is my EMI calculated and when is the first EMI due?
+    chunks -> parent docs : ['02_emi_calculation', '02_emi_calculation', '02_emi_calculation']
+    deduped retrieved     : ['02_emi_calculation']
+    relevant              : ['02_emi_calculation']
+    precision = 1/1 = 1.000    recall = 1/1 = 1.000
+Q6: What credit score gets the lowest interest rate, and what hurts my credit score?
+    chunks -> parent docs : ['10_credit_score_factors', '07_interest_rate_slabs', '10_credit_score_factors']
+    deduped retrieved     : ['10_credit_score_factors', '07_interest_rate_slabs']
+    relevant              : ['07_interest_rate_slabs', '10_credit_score_factors']
+    precision = 2/2 = 1.000    recall = 2/2 = 1.000
+
+  MEAN precision = (0.500 + 1.000 + 0.500 + 1.000 + 1.000 + 1.000) / 6 = 0.833
+  MEAN recall    = (1.000 + 1.000 + 1.000 + 1.000 + 1.000 + 1.000) / 6 = 1.000
+
+==========================================================================================
+cred_kb_sentence   (top-k = 3 chunks)
+==========================================================================================
+Q1: What is the minimum monthly income required for a personal loan?
+    chunks -> parent docs : ['01_loan_eligibility', '01_loan_eligibility', '07_interest_rate_slabs']
+    deduped retrieved     : ['01_loan_eligibility', '07_interest_rate_slabs']
+    relevant              : ['01_loan_eligibility']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q2: Do I pay a foreclosure charge if I prepay my personal loan?
+    chunks -> parent docs : ['08_prepayment_penalty', '08_prepayment_penalty', '07_interest_rate_slabs']
+    deduped retrieved     : ['08_prepayment_penalty', '07_interest_rate_slabs']
+    relevant              : ['08_prepayment_penalty']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q3: Which documents are needed to complete KYC?
+    chunks -> parent docs : ['04_kyc_documents', '11_joint_account_rules', '04_kyc_documents']
+    deduped retrieved     : ['04_kyc_documents', '11_joint_account_rules']
+    relevant              : ['04_kyc_documents']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q4: What should I do if I see an unauthorised transaction on my card?
+    chunks -> parent docs : ['05_fraud_dispute', '05_fraud_dispute', '12_nri_account_eligibility']
+    deduped retrieved     : ['05_fraud_dispute', '12_nri_account_eligibility']
+    relevant              : ['05_fraud_dispute']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q5: How is my EMI calculated and when is the first EMI due?
+    chunks -> parent docs : ['02_emi_calculation', '02_emi_calculation', '09_minimum_balance']
+    deduped retrieved     : ['02_emi_calculation', '09_minimum_balance']
+    relevant              : ['02_emi_calculation']
+    precision = 1/2 = 0.500    recall = 1/1 = 1.000
+Q6: What credit score gets the lowest interest rate, and what hurts my credit score?
+    chunks -> parent docs : ['10_credit_score_factors', '10_credit_score_factors', '07_interest_rate_slabs']
+    deduped retrieved     : ['10_credit_score_factors', '07_interest_rate_slabs']
+    relevant              : ['07_interest_rate_slabs', '10_credit_score_factors']
+    precision = 2/2 = 1.000    recall = 2/2 = 1.000
+
+  MEAN precision = (0.500 + 0.500 + 0.500 + 0.500 + 0.500 + 1.000) / 6 = 0.583
+  MEAN recall    = (1.000 + 1.000 + 1.000 + 1.000 + 1.000 + 1.000) / 6 = 1.000
+
+==========================================================================================
+SUMMARY
+  cred_kb_fixed      mean precision = 0.833   mean recall = 1.000
+  cred_kb_sentence   mean precision = 0.583   mean recall = 1.000
+  deployed collection (config.DEPLOYED_COLLECTION) = cred_kb_fixed
+
+--- stderr ---
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1273.02it/s]

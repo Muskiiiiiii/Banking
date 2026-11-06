@@ -1,0 +1,65 @@
+# task11_api
+# command: python -m scripts.task11_api
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+
+====================================================================================================
+TASK 11 (A) — HTTP endpoints via TestClient
+====================================================================================================
+GET /health -> {'status': 'ok', 'mock_llm': True, 'collection': 'cred_kb_fixed'}
+
+POST /ask (policy) -> 200
+   intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: The late-payment fee ranges from Rs 100 to Rs 1,300 depending on the statement balance [03_credit_card_fees].
+
+POST /ask (status + PII) -> 200
+   intent=status flags=['pii_masked:BANK_ACCOUNTx1', 'review_approved'] tools=['check_loan_application_status']
+      answer: Application CRED-LA-0035 (Education Loan) is currently Approved for a loan amount of Rs 46,80,000. Its escalation score is 1.0, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+
+POST /ask with empty query -> 422 (Pydantic validation: String should have at least 1 character)
+
+Before adding a document: POST /ask 'Can I get a gold loan from Cred?'
+    intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: Personal loan applicants must be salaried or self-employed Indian residents aged 21 to 60 with a net monthly income of at least Rs 25,000 [01_loan_eligibility]. Home loan applicants can be aged 21 to 65 at loan maturity and must contribute at least 20% of the property value as down payment [01_loan_eligibility]. Auto loans require a minimum net monthly income of Rs 20,000 and fund up to 90% of the on-road price of a new vehicle [01_loan_eligibility].
+
+POST /add-document -> 200 {'trace_id': '85471b37bffa4471af22d5b9825ec186', 'doc_id': '14_gold_loan', 'chunks_upserted': {'cred_kb_fixed': 2, 'cred_kb_sentence': 2}}
+After adding: POST /ask 'Can I get a gold loan from Cred?'
+    intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: Gold loans are offered against gold jewellery of 18 to 24 carat purity [14_gold_loan]. Gold loans carry interest of 9.9% to 18% per annum and tenures of 3 to 24 months [14_gold_loan].
+
+====================================================================================================
+TASK 11 (A) — WebSocket /ws/chat: multi-turn, then a client disconnects mid-conversation
+====================================================================================================
+alice turn 1 -> intent=status flags=['review_approved'] tools=['check_loan_application_status']
+      answer: Application CRED-LA-0034 (Personal Loan) is currently Submitted for a loan amount of Rs 3,10,000. Its escalation score is 0.9733, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+alice turn 2 (memory) -> intent=status flags=['review_approved'] tools=['check_loan_application_status']
+      answer: Application CRED-LA-0034 (Personal Loan) is currently Submitted for a loan amount of Rs 3,10,000. Its escalation score is 0.9733, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+alice sent turn 3 and closed the socket WITHOUT waiting for the reply
+bob (new client, same server) -> intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: KYC must be refreshed every 2 years for high-risk accounts, every 8 years for medium-risk accounts and every 10 years for low-risk accounts [04_kyc_documents].
+GET /health after disconnect -> {'status': 'ok', 'mock_llm': True, 'collection': 'cred_kb_fixed'}
+
+====================================================================================================
+TASK 11 (B) — real uvicorn server + real WebSocket disconnect
+====================================================================================================
+uvicorn up on port 56974: {'status': 'ok', 'mock_llm': True, 'collection': 'cred_kb_fixed'}
+real client 1 -> intent=status flags=['review_approved'] tools=['check_loan_application_status']
+      answer: Application CRED-LA-0010 (Personal Loan) is currently Disbursed for a loan amount of Rs 14,10,000. Its escalation score is 0.6, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+real client 1 dropped its TCP socket mid-conversation
+server process still running: True
+real client 2 -> intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: Salary accounts and basic savings bank deposit accounts have no minimum-balance requirement [09_minimum_balance].
+POST /ask over real HTTP -> 200 intent=policy flags=['review_approved'] tools=['rag_lookup']
+      answer: Repatriation from an NRO account is capped at USD 1 million per financial year [12_nri_account_eligibility].
+
+--- stderr ---
+C:\Users\ronak\Downloads\Banking\api\main.py:39: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  conversations = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1190.89it/s]
+C:\Users\ronak\Downloads\Banking\scripts\task11_api.py:103: DeprecationWarning: connect() must be used as a context manager: with connect(...) as websocket: ...; alternatively, use websocket = connect(..., legacy=True) to connect directly
+  ws.send(json.dumps({"query": "What is the status of CRED-LA-0010?"}))

@@ -1,0 +1,2 @@
+# KYC document requirements
+Every member must complete KYC with a PAN card and one officially valid address proof such as Aadhaar, passport, voter ID or driving licence. Video KYC is accepted for digital onboarding, and the live session must be completed from within India. Loan applicants additionally submit their last 3 months of salary slips or 2 years of income-tax returns for the self-employed. KYC must be refreshed every 2 years for high-risk accounts, every 8 years for medium-risk accounts and every 10 years for low-risk accounts.

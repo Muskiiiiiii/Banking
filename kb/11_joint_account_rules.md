@@ -1,0 +1,2 @@
+# Joint-account rules
+A joint account can have up to 4 holders, and every holder must complete KYC separately. Operating instructions can be either-or-survivor, former-or-survivor, or jointly by all holders, and they can be changed only with the written consent of all holders. On the death of one holder in an either-or-survivor account, the surviving holder can continue to operate the account after submitting the death certificate. Joint home loans allow each co-borrower to claim their share of the interest and principal tax benefits.

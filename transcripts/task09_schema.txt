@@ -1,0 +1,50 @@
+# task09_schema
+# command: python -m scripts.task9_schema
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+CrewResponse JSON schema (what every answer must look like):
+  answer           required  {"minLength": 1, "type": "string"}
+  intent           required  {"enum": ["policy", "status", "policy+status", "refused", "clarify"], "type": "string"}
+  grounded         required  {"type": "boolean"}
+  sources          optional  {"items": {"type": "string"}, "type": "array"}
+  record_lookup    optional  {"anyOf": [{"$ref": "#/$defs/LoanStatusResult"}, {"type": "null"}], "default": null}
+  escalate         optional  {"default": false, "type": "boolean"}
+  tools_used       optional  {"items": {"type": "string"}, "type": "array"}
+  guardrail_flags  optional  {"items": {"type": "string"}, "type": "array"}
+
+Validating real crew responses:
+
+  Q: What is the late-payment fee on the credit card?
+  VALID ✓ intent=policy grounded=True tools=['rag_lookup']
+  {"answer":"The late-payment fee ranges from Rs 100 to Rs 1,300 depending on the statement balance [03_credit_card_fees].","intent":"policy","grounded":true,"sources":["03_credit_card_fees","10_credit_score_factors"],"record_lookup":null,"escalate":false,"tools...
+
+  Q: What is the status of CRED-LA-0004?
+  VALID ✓ intent=status grounded=True tools=['check_loan_application_status']
+  {"answer":"Application CRED-LA-0004 (Home Loan) is currently Submitted for a loan amount of Rs 21,30,000. Its escalation score is 0.12, below the threshold of 0.336, so no escalation is needed.","intent":"status","grounded":true,"sources":[],"record_lookup":{"...
+
+  Q: What is the status of CRED-LA-0001 and when will it be disbursed?
+  VALID ✓ intent=policy+status grounded=True tools=['check_loan_application_status', 'rag_lookup']
+  {"answer":"Application CRED-LA-0001 (Personal Loan) is currently Approved for a loan amount of Rs 13,05,000. Its escalation score is 0.36, at or above the threshold of 0.336, so it should be escalated to a senior lending officer. Approved loans are usually dis...
+
+  Q: What is the best pizza place in Bengaluru?
+  VALID ✓ intent=refused grounded=False tools=['rag_lookup']
+  {"answer":"I don't know — Cred's policy documents do not cover this question. Please contact a support specialist.","intent":"refused","grounded":false,"sources":[],"record_lookup":null,"escalate":false,"tools_used":["rag_lookup"],"guardrail_flags":["groundedn...
+
+  Q: What is its loan amount?
+  VALID ✓ intent=clarify grounded=True tools=[]
+  {"answer":"Please share the loan application ID (format CRED-LA-0000) so I can check its status.","intent":"clarify","grounded":true,"sources":[],"record_lookup":null,"escalate":false,"tools_used":[],"guardrail_flags":["needs_record_id"]}...
+
+Negative tests (must be rejected):
+  empty answer + unknown intent + non-bool grounded: REJECTED -> 3 error(s): answer: String should have at least 1 character; intent: Input should be 'policy', 'status', 'policy+status', 'refused' or 'clarify'; grounded: Input should be a valid boolean, unable to interpret input
+  escalation_score out of [0, 1]: REJECTED -> 1 error(s): record_lookup.escalation_score: Input should be less than or equal to 1
+  missing required field 'grounded': REJECTED -> 1 error(s): grounded: Field required
+
+--- stderr ---
+C:\Users\ronak\Downloads\Banking\scripts\task9_schema.py:31: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  cm = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 5336.79it/s]

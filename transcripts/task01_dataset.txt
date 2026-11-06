@@ -1,0 +1,33 @@
+# task01_dataset
+# command: python dataset.py
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+SEED=2026  N_RECORDS=50
+Category weights: {'Personal Loan': 0.3, 'Home Loan': 0.2, 'Auto Loan': 0.2, 'Education Loan': 0.15, 'Business Loan': 0.15}
+Status weights:   {'Submitted': 0.2, 'Under Review': 0.3, 'Approved': 0.15, 'Rejected': 0.15, 'Disbursed': 0.2}
+Fraud-flag probability: 0.18
+
+Count per category (each must be >= 3):
+  Personal Loan    10
+  Home Loan        13
+  Auto Loan        17
+  Education Loan    4
+  Business Loan     6
+
+Count per status (each must be >= 1):
+  Submitted         9
+  Under Review     13
+  Approved          8
+  Rejected          7
+  Disbursed        13
+
+flagged_for_fraud_review=True: 8/50 = 16.0%  (required band 10%–30%)
+
+All structural thresholds PASS.
+
+First 5 records:
+  {'record_id': 'CRED-LA-0001', 'category': 'Personal Loan', 'status': 'Approved', 'loan_amount_inr': 1305000, 'days_since_created': 27, 'flagged_for_fraud_review': False}
+  {'record_id': 'CRED-LA-0002', 'category': 'Business Loan', 'status': 'Disbursed', 'loan_amount_inr': 12620000, 'days_since_created': 13, 'flagged_for_fraud_review': False}
+  {'record_id': 'CRED-LA-0003', 'category': 'Auto Loan', 'status': 'Rejected', 'loan_amount_inr': 2350000, 'days_since_created': 24, 'flagged_for_fraud_review': False}
+  {'record_id': 'CRED-LA-0004', 'category': 'Home Loan', 'status': 'Submitted', 'loan_amount_inr': 2130000, 'days_since_created': 9, 'flagged_for_fraud_review': False}
+  {'record_id': 'CRED-LA-0005', 'category': 'Home Loan', 'status': 'Disbursed', 'loan_amount_inr': 10590000, 'days_since_created': 21, 'flagged_for_fraud_review': False}

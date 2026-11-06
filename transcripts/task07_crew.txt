@@ -1,0 +1,40 @@
+# task07_crew
+# command: python -m scripts.task7_crew
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+MOCK_LLM=True  CREWAI_DISABLE_TELEMETRY=true  OTEL_SDK_DISABLED=true
+
+Crew agents:
+  Policy Retrieval Agent   tools=['rag_lookup']  llm=MockCrewLLM
+  Loan Lookup Agent        tools=['check_loan_application_status']  llm=MockCrewLLM
+  Response Composer        tools=[]  llm=MockCrewLLM
+
+MOCK_LLM pitfall checks from the brief:
+  (1) tool result read from the system-prompt template on the first call -> None  (None = template correctly ignored)
+  (2) 'rag_lookup'                       declared fields=['query'] -> args {'query': 'Can I prepay my loan?'}
+  (2) 'check_loan_application_status'    declared fields=['record_id'] -> args {'record_id': 'CRED-LA-0004'}
+
+QUERY : Is there a prepayment penalty on a floating-rate home loan?
+tools invoked : ["rag_lookup{'query': 'Is there a prepayment penalty on a floating-rate home loan?'}"]
+LLM calls     : 3
+intent=policy  grounded=True  escalate=False  sources=['08_prepayment_penalty']
+DRAFT ANSWER  : Floating-rate home loans taken by individuals carry no prepayment or foreclosure penalty, in line with RBI guidelines [08_prepayment_penalty].
+
+QUERY : What is the status of CRED-LA-0007?
+tools invoked : ["check_loan_application_status{'record_id': 'CRED-LA-0007'}"]
+LLM calls     : 3
+intent=status  grounded=True  escalate=True  sources=[]
+DRAFT ANSWER  : Application CRED-LA-0007 (Business Loan) is currently Approved for a loan amount of Rs 19,90,000. Its escalation score is 0.7333, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+
+QUERY : What is the status of CRED-LA-0001 and when will it be disbursed?
+tools invoked : ["rag_lookup{'query': 'What is the status of and when will it be disbursed?'}", "check_loan_application_status{'record_id': 'CRED-LA-0001'}"]
+LLM calls     : 5
+intent=policy+status  grounded=True  escalate=True  sources=['05_fraud_dispute', '06_account_closure', '13_application_status_stages']
+DRAFT ANSWER  : Application CRED-LA-0001 (Personal Loan) is currently Approved for a loan amount of Rs 13,05,000. Its escalation score is 0.36, at or above the threshold of 0.336, so it should be escalated to a senior lending officer. Approved loans are usually disbursed within 2 working days after the loan agreement is e-signed [13_application_status_stages]. Every fraud dispute is resolved within 90 days, and an unresolved complaint can be escalated to the RBI Ombudsman after 30 days [05_fraud_dispute].
+
+--- stderr ---
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights:  58%|█████▊    | 60/103 [00:00<00:00, 599.03it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 924.69it/s]

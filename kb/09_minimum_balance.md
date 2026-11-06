@@ -1,0 +1,2 @@
+# Minimum-balance requirements
+Regular savings accounts must maintain an average monthly balance of Rs 10,000 in metro and urban branches and Rs 5,000 in semi-urban and rural branches. Salary accounts and basic savings bank deposit accounts have no minimum-balance requirement. If the average monthly balance falls short, a charge of 6% of the shortfall is applied, capped at Rs 600 per month. The member is notified by SMS and in the app before any shortfall charge is levied.

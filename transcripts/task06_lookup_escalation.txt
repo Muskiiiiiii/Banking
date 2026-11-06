@@ -1,0 +1,22 @@
+# task06_lookup_escalation
+# command: python -m scripts.task6_lookup
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+escalation_score = 0.6 * fraud + 0.4 * staleness
+  fraud     = 1 if flagged_for_fraud_review else 0
+  staleness = days_since_created / 30 for open statuses (Submitted, Under Review, Approved); 0 for Rejected/Disbursed
+
+Open applications: 30 of 50
+Sorted days_since_created (open): [0, 0, 2, 4, 4, 5, 8, 8, 9, 10, 10, 11, 11, 11, 14, 17, 17, 18, 19, 20, 20, 22, 22, 25, 26, 27, 27, 28, 30, 30]
+80th percentile = 25.2 days
+threshold = 0.4 * 25.2 / 30 = 0.336
+
+Escalated: 11/50 (22%) -> {'stale open application': 3, 'fraud flag': 8}
+
+Sample lookups:
+  {"record_id": "CRED-LA-0007", "found": true, "category": "Business Loan", "status": "Approved", "loan_amount_inr": 1990000, "days_since_created": 10, "flagged_for_fraud_review": true, "escalation_score": 0.7333, "escalation_threshold": 0.336, "escalate": true}
+  {"record_id": "CRED-LA-0001", "found": true, "category": "Personal Loan", "status": "Approved", "loan_amount_inr": 1305000, "days_since_created": 27, "flagged_for_fraud_review": false, "escalation_score": 0.36, "escalation_threshold": 0.336, "escalate": true}
+  {"record_id": "CRED-LA-0004", "found": true, "category": "Home Loan", "status": "Submitted", "loan_amount_inr": 2130000, "days_since_created": 9, "flagged_for_fraud_review": false, "escalation_score": 0.12, "escalation_threshold": 0.336, "escalate": false}
+  {"record_id": "CRED-LA-0042", "found": true, "category": "Auto Loan", "status": "Rejected", "loan_amount_inr": 1645000, "days_since_created": 30, "flagged_for_fraud_review": true, "escalation_score": 0.6, "escalation_threshold": 0.336, "escalate": true}
+  {"record_id": "CRED-LA-0013", "found": true, "category": "Education Loan", "status": "Approved", "loan_amount_inr": 3855000, "days_since_created": 26, "flagged_for_fraud_review": true, "escalation_score": 0.9467, "escalation_threshold": 0.336, "escalate": true}
+  {"record_id": "CRED-LA-9999", "found": false, "error": "No loan application found with id 'CRED-LA-9999'."}

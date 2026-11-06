@@ -1,0 +1,2 @@
+# Credit-card fee structure
+The standard Cred-partner credit card carries a joining fee of Rs 499 and an annual fee of Rs 499, and the annual fee is waived when yearly spends cross Rs 1,50,000. Revolving balances attract finance charges of 3.5% per month on the unpaid amount. The late-payment fee ranges from Rs 100 to Rs 1,300 depending on the statement balance. Cash withdrawals carry a 2.5% fee with a minimum of Rs 500, and foreign-currency transactions carry a 3.5% markup.

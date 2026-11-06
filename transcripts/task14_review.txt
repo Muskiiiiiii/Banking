@@ -1,0 +1,69 @@
+# task14_review
+# command: python -m scripts.task14_review
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+Team: RoundRobinGroupChat  participants=['Policy_Compliance_Reviewer', 'Final_Editor']  max_turns=2
+Final_Editor: output_content_type=ReviewVerdict; team: custom_message_types=[StructuredMessage[ReviewVerdict]]
+ReviewVerdict fields: ['approved', 'final_answer', 'reason']
+
+==========================================================================================
+CASE 1 — grounded draft -> expected APPROVED unchanged
+==========================================================================================
+  crew draft : Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty].
+  review team messages:
+    - Policy_Compliance_Reviewer: ALL CLAIMS SUPPORTED (2 of 2 sentences checked against the context).
+    - Final_Editor: approved=True final_answer='Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty].' reason='Reviewer found every claim supported by the retrieved context; draft approved unchanged.'
+  VERDICT    : approved=True
+    final_answer : Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty].
+    reason       : Reviewer found every claim supported by the retrieved context; draft approved unchanged.
+  unchanged: True
+
+==========================================================================================
+CASE 2 — same question, false claim injected into the draft -> expected REVISED
+==========================================================================================
+  crew draft : Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty]. Personal loans carry a 1% foreclosure charge with no lock-in period.
+  review team messages:
+    - Policy_Compliance_Reviewer: 1 of 3 sentences are not supported by the context:
+UNSUPPORTED: Personal loans carry a 1% foreclosure charge with no lock-in period. || best_similarity=0.6548, numbers not in context=['1']
+    - Final_Editor: approved=False final_answer='Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty].' reason='Removed 1 unsupported claim(s): Personal loans carry a 1% foreclosure charge with no lock-in period.'
+  VERDICT    : approved=False
+    final_answer : Auto and business loans carry a foreclosure charge of 3% of the outstanding principal [08_prepayment_penalty]. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST [08_prepayment_penalty].
+    reason       : Removed 1 unsupported claim(s): Personal loans carry a 1% foreclosure charge with no lock-in period.
+  injected claim removed: True
+
+==========================================================================================
+CASE 3 — status answer with a wrong amount injected -> expected REVISED
+==========================================================================================
+  crew draft : Application CRED-LA-0004 (Home Loan) is currently Submitted for a loan amount of Rs 21,30,000. Its escalation score is 0.12, below the threshold of 0.336, so no escalation is needed. The sanctioned amount was later raised to Rs 50,00,000.
+  review team messages:
+    - Policy_Compliance_Reviewer: 1 of 3 sentences are not supported by the context:
+UNSUPPORTED: The sanctioned amount was later raised to Rs 50,00,000. || best_similarity=0.4409, numbers not in context=['5000000']
+    - Final_Editor: approved=False final_answer='Application CRED-LA-0004 (Home Loan) is currently Submitted for a loan amount of Rs 21,30,000. Its escalation score is 0.12, below the threshold of 0.336, so no escalation is needed.' reason='Removed 1 unsupported claim(s): The sanctioned amount was later raised to Rs 50,00,000.'
+  VERDICT    : approved=False
+    final_answer : Application CRED-LA-0004 (Home Loan) is currently Submitted for a loan amount of Rs 21,30,000. Its escalation score is 0.12, below the threshold of 0.336, so no escalation is needed.
+    reason       : Removed 1 unsupported claim(s): The sanctioned amount was later raised to Rs 50,00,000.
+  injected claim removed: True
+
+==========================================================================================
+CASE 4 — KNOWN LIMITATION: a one-word falsehood with no number (expected to be MISSED)
+==========================================================================================
+  crew draft : Floating-rate home loans taken by individuals carry no prepayment or foreclosure penalty, in line with RBI guidelines [08_prepayment_penalty]. Floating-rate home loans taken by companies carry no prepayment penalty.
+  review team messages:
+    - Policy_Compliance_Reviewer: ALL CLAIMS SUPPORTED (2 of 2 sentences checked against the context).
+    - Final_Editor: approved=True final_answer='Floating-rate home loans taken by individuals carry no prepayment or foreclosure penalty, in line with RBI guidelines [08_prepayment_penalty]. Floating-rate home loans taken by companies carry no prepayment penalty.' reason='Reviewer found every claim supported by the retrieved context; draft approved unchanged.'
+  VERDICT    : approved=True
+    final_answer : Floating-rate home loans taken by individuals carry no prepayment or foreclosure penalty, in line with RBI guidelines [08_prepayment_penalty]. Floating-rate home loans taken by companies carry no prepayment penalty.
+    reason       : Reviewer found every claim supported by the retrieved context; draft approved unchanged.
+  false claim ('companies' instead of 'individuals') still in final answer: True  <- the mock reviewer cannot catch this
+
+reviewer calls=4  editor calls=4 (4 reviews; max_turns=2 lets both agents speak exactly once per review)
+
+--- stderr ---
+C:\Users\ronak\Downloads\Banking\scripts\task14_review.py:33: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  cm = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1355.78it/s]

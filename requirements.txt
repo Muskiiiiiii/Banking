@@ -1,0 +1,17 @@
+# Tested with Python 3.13 on Linux (CPU only). Everything runs under MOCK_LLM=1 with no API keys.
+crewai==1.15.35
+autogen-agentchat==0.7.5
+autogen-core==0.7.5
+langchain-core==1.7.6
+chromadb==1.5.9
+sentence-transformers==6.2.0
+torch>=2.2            # CPU build is enough: pip install torch --index-url https://download.pytorch.org/whl/cpu
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
+websockets==17.4
+pydantic==2.12.5
+pytest>=8
+# autogen-core pins protobuf 5.x; newer googleapis-common-protos (pulled in by crewai's
+# OpenTelemetry exporter) wants protobuf 6+. This pin keeps `pip check` clean.
+googleapis-common-protos<1.71

@@ -1,0 +1,2 @@
+# Loan application status stages
+A loan application moves through five stages: Submitted, Under Review, Approved, Rejected and Disbursed. Applications stay Under Review for up to 7 working days while documents and credit checks are verified. Approved loans are usually disbursed within 2 working days after the loan agreement is e-signed. A rejected applicant can reapply for the same loan type after 90 days.

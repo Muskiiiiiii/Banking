@@ -1,0 +1,2 @@
+# Account-closure process
+A member can request account closure from the app or by submitting a signed closure form at a partner branch. All outstanding dues, including any loan EMIs and credit-card balances, must be cleared before closure is processed. Closure is completed within 7 working days of the request, and the remaining balance is transferred to the member's linked account. No closure fee is charged after the first year, while accounts closed within the first year pay Rs 500 plus GST.

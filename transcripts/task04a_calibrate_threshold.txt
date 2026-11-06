@@ -1,0 +1,58 @@
+# task04a_calibrate_threshold
+# command: python -m scripts.calibrate_threshold
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+[index] cred_kb_fixed      strategy=fixed    chunks=44 (from 13 documents)
+[index] cred_kb_sentence   strategy=sentence chunks=26 (from 13 documents)
+
+=== cred_kb_fixed ===
+  IN   top1=0.6424  What is the minimum income to get a personal loan?
+  IN   top1=0.7649  Is there a penalty for prepaying my floating-rate home loan?
+  IN   top1=0.6035  What documents do I need for KYC?
+  IN   top1=0.8022  How long does a fraud dispute take to resolve?
+  IN   top1=0.5666  What is the annual fee on the credit card?
+  IN   top1=0.6569  Can an NRI open an NRE account?
+  OUT  top1=0.1366  What is the best pizza place in Bengaluru?
+  OUT  top1=0.1526  Who won the cricket world cup final?
+  OUT  top1=0.1100  How do I bake sourdough bread at home?
+  OUT  top1=0.0745  Can you recommend a good laptop for gaming?
+  OUT  top1=0.1029  What is the weather like in Goa this weekend?
+  OUT  top1=0.3020  What is the current price of gold?
+  OUT  top1=0.3055  How do I file my income tax return?
+  OUT  top1=0.2792  Tell me about your travel insurance plans
+  OUT  top1=0.2107  How do I invest in Bitcoin through Cred?
+  in-scope range  [0.5666, 0.8022]
+  out-of-scope range [0.0745, 0.3055]
+  gap = (0.3055, 0.5666)  midpoint = 0.4360
+
+=== cred_kb_sentence ===
+  IN   top1=0.6407  What is the minimum income to get a personal loan?
+  IN   top1=0.7647  Is there a penalty for prepaying my floating-rate home loan?
+  IN   top1=0.5921  What documents do I need for KYC?
+  IN   top1=0.7388  How long does a fraud dispute take to resolve?
+  IN   top1=0.5783  What is the annual fee on the credit card?
+  IN   top1=0.6637  Can an NRI open an NRE account?
+  OUT  top1=0.1213  What is the best pizza place in Bengaluru?
+  OUT  top1=0.1447  Who won the cricket world cup final?
+  OUT  top1=0.1158  How do I bake sourdough bread at home?
+  OUT  top1=0.0861  Can you recommend a good laptop for gaming?
+  OUT  top1=0.1159  What is the weather like in Goa this weekend?
+  OUT  top1=0.2694  What is the current price of gold?
+  OUT  top1=0.2708  How do I file my income tax return?
+  OUT  top1=0.1818  Tell me about your travel insurance plans
+  OUT  top1=0.1767  How do I invest in Bitcoin through Cred?
+  in-scope range  [0.5783, 0.7647]
+  out-of-scope range [0.0861, 0.2708]
+  gap = (0.2708, 0.5783)  midpoint = 0.4245
+
+Configured IDK_THRESHOLD = 0.42
+
+Brand-word check for 'How do I invest in Bitcoin through Cred?' (retrieval text without brand: 'How do I invest in Bitcoin through ?')
+  cred_kb_fixed      with 'Cred' = 0.4296   brand removed = 0.2107   threshold = 0.42
+  cred_kb_sentence   with 'Cred' = 0.4508   brand removed = 0.1767   threshold = 0.42
+
+--- stderr ---
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 2590.68it/s]

@@ -1,0 +1,2 @@
+# Prepayment-penalty rules
+Floating-rate home loans taken by individuals carry no prepayment or foreclosure penalty, in line with RBI guidelines. Personal loans can be prepaid only after 6 EMIs have been paid, and the foreclosure charge is 4% of the outstanding principal plus GST. Auto and business loans carry a foreclosure charge of 3% of the outstanding principal. Part-prepayment of up to 25% of the outstanding principal is allowed once a year without any charge.

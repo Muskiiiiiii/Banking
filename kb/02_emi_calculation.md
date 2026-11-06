@@ -1,0 +1,2 @@
+# EMI calculation rules
+The equated monthly instalment (EMI) is calculated on a reducing-balance basis using the formula EMI = P x r x (1+r)^n / ((1+r)^n - 1), where P is the principal, r is the monthly interest rate and n is the tenure in months. The first EMI falls due on the 5th of the month after disbursement, and interest for the broken period before that date is collected separately. EMIs are debited through e-NACH from the member's registered bank account. A bounced EMI attracts a fee of Rs 500 plus GST in addition to penal charges on the overdue amount.

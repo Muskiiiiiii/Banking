@@ -1,0 +1,43 @@
+# task08_memory
+# command: python -m scripts.task8_memory
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+==========================================================================================
+TRANSCRIPT A — one session, state carried across turns
+==========================================================================================
+
+[session-A] USER : Can you check application CRED-LA-0013 for me?
+   tools    : ["check_loan_application_status{'record_id': 'CRED-LA-0013'}"]
+   AGENT    : Application CRED-LA-0013 (Education Loan) is currently Approved for a loan amount of Rs 38,55,000. Its escalation score is 0.9467, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+
+[session-A] USER : What is its loan amount?
+   memory   : resolved CRED-LA-0013 from this session's history
+   tools    : ["check_loan_application_status{'record_id': 'CRED-LA-0013'}"]
+   AGENT    : Application CRED-LA-0013 (Education Loan) is currently Approved for a loan amount of Rs 38,55,000. Its escalation score is 0.9467, at or above the threshold of 0.336, so it should be escalated to a senior lending officer.
+
+[session-A] USER : Can I prepay it, and is there a penalty?
+   memory   : resolved CRED-LA-0013 from this session's history
+   tools    : ["rag_lookup{'query': 'Can I prepay it, and is there a penalty?'}", "check_loan_application_status{'record_id': 'CRED-LA-0013'}"]
+   AGENT    : Application CRED-LA-0013 (Education Loan) is currently Approved for a loan amount of Rs 38,55,000. Its escalation score is 0.9467, at or above the threshold of 0.336, so it should be escalated to a senior lending officer. Part-prepayment of up to 25% of the outstanding principal is allowed once a year without any charge [08_prepayment_penalty].
+
+session-A history: 6 messages -> ['HumanMessage', 'AIMessage', 'HumanMessage', 'AIMessage', 'HumanMessage', 'AIMessage']
+
+==========================================================================================
+TRANSCRIPT B — a fresh session, state correctly absent
+==========================================================================================
+
+[session-B] USER : What is its loan amount?
+   tools    : none
+   AGENT    : Please share the loan application ID (format CRED-LA-0000) so I can check its status.
+
+session-B history: 2 messages (only its own exchange; nothing from session-A)
+
+--- stderr ---
+C:\Users\ronak\Downloads\Banking\scripts\task8_memory.py:22: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  cm = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 2446.35it/s]

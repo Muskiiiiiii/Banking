@@ -1,0 +1,29 @@
+# task16_cache
+# command: python -m scripts.task16_cache
+# env: MOCK_LLM=1 CREWAI_DISABLE_TELEMETRY=true OTEL_SDK_DISABLED=true HF_HUB_OFFLINE=1
+
+Cache key = normalise(query) + collection + top-k
+  normalise('What is the prepayment penalty on a personal loan?') = 'what is the prepayment penalty on a personal loan'
+  normalise('  what is the PREPAYMENT penalty on a personal loan  ') = 'what is the prepayment penalty on a personal loan'
+
+call                                    cache_hit  LLM calls  embed calls   time (ms)
+1. first ask (cold)                     False      +1         +3            21779.365
+2. identical repeat                     True       +0         +0                0.133
+3. case/space/punctuation variant       True       +0         +0                0.016
+4. a different question                 False      +1         +3              137.643
+
+cache stats: {'hits': 2, 'misses': 2}
+
+Through the full crew (RAG tool reports whether the cache was hit):
+  run 1: cache_hit=False  grounded-generation LLM calls +1  answer: The standard Cred-partner credit card carries a joining fee of Rs 499 ...
+  run 2: cache_hit=True  grounded-generation LLM calls +0  answer: The standard Cred-partner credit card carries a joining fee of Rs 499 ...
+
+--- stderr ---
+Could not reach the Hub (Cannot reach https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.). Using cached commit hash for 'sentence-transformers/all-MiniLM-L6-v2'.
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 103/103 [00:00<00:00, 1877.49it/s]
+C:\Users\ronak\Downloads\Banking\scripts\task16_cache.py:37: LangChainDeprecationWarning: RunnableWithMessageHistory is deprecated. Use LangGraph's built-in persistence instead.
+  cm = ConversationManager()
+C:\Users\ronak\Downloads\Banking\agents\memory.py:38: LangChainDeprecationWarning: The class `InMemoryChatMessageHistory` was deprecated in LangChain 1.6.4 and will be removed in 2.0.0 See the short-term memory documentation for recommended alternatives: https://docs.langchain.com/oss/python/langchain/short-term-memory
+  self._store[session_id] = InMemoryChatMessageHistory()

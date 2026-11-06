@@ -1,0 +1,2 @@
+# Credit-score impact factors
+Repayment history is the biggest factor in a credit score, and even one EMI paid more than 30 days late can lower it sharply. Keeping credit-card utilisation below 30% of the total limit helps the score, while maxing out cards hurts it. Several hard enquiries from loan applications within a short period reduce the score, but checking your own score on the Cred app is a soft enquiry with no impact. A longer credit history and a healthy mix of secured and unsecured loans also improve the score over time.
